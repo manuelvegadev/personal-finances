@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -17,11 +18,7 @@ type ContextType = {
 };
 
 const defaultContext: ContextType = {
-  theme:
-    window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'g100'
-      : 'white',
+  theme: 'white',
   toggleTheme: () => {
     /* Comment for avoid eslint error for empty function */
   },
@@ -38,11 +35,22 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const contextValues = useMemo(() => ({ theme, toggleTheme }), [theme]);
 
-  window
-    .matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', (event) => {
-      toggleTheme(event.matches ? 'g100' : 'white');
-    });
+  useEffect(() => {
+    if (window) {
+      setTheme(
+        window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'g100'
+          : 'white',
+      );
+
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', (event) => {
+          setTheme(event.matches ? 'g100' : 'white');
+        });
+    }
+  }, []);
 
   return (
     <themeContext.Provider value={contextValues}>
